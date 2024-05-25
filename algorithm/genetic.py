@@ -7,16 +7,16 @@ import matplotlib.pyplot as plt
 
 INT_MAX = 100000000000 
 # Number of cities in TSP
-NUM_LOCATIONS = 10
+NUM_LOCATIONS = 30
 
 # Initial population size for the algorithm
-POP_SIZE = 10
+POP_SIZE = 20
 
 # Vehicles
-NUM_BIKES = 2
-NUM_CARS = 2
+NUM_BIKES = 3
+NUM_CARS = 1
 
-NUM_GENERATIONS = 100000
+NUM_GENERATIONS = 1000000
 
 NUM_VEHICLES = NUM_BIKES + NUM_CARS
 
@@ -28,20 +28,19 @@ NUM_VEHICLES = NUM_BIKES + NUM_CARS
 
 # Temporary fake matrix generator
 def generate_points(max_range=100):
-    points = [(round(random.uniform(0, max_range),3), round(random.uniform(0, max_range), 3)) for _ in range(POP_SIZE)]
+    points = [(round(random.uniform(0, max_range),3), round(random.uniform(0, max_range), 3)) for _ in range(NUM_LOCATIONS)]
     return points
 
 def create_distance_matrix():
-    points = generate_points(POP_SIZE)
+    points = generate_points()
     matrix = [[0 for _ in range(len(points))] for _ in range(len(points))]
     for i, p in enumerate(points):
         for j, q in enumerate(points): 
             matrix[i][j] = get_distance(p, q)
-
     return matrix
 
 def create_ewi_distances(max_range=100):
-    return [round(random.uniform(0, max_range),3) for _ in range(POP_SIZE)]
+    return [round(random.uniform(0, max_range),3) for _ in range(NUM_LOCATIONS)]
 
 
 def get_distance(p, q):
@@ -68,7 +67,7 @@ class individual:
         return self.gnome == other.gnome
 
     def __hash__(self):
-        return hash(tuple(self.gnome))
+        return hash(str(self.gnome))
 
 # Function to return a random number
 # from start and end
@@ -100,7 +99,7 @@ def mutate_gnome(gnome):
 # Change the order of two destinations within one vehicle
 def mutate_gnome_route(gnome):
     vehicle = rand_num(0, NUM_VEHICLES)
-    gnome_v = list(gnome[vehicle])
+    gnome_v = gnome[vehicle][:]
     if len(gnome_v) == 0 or len(gnome_v) == 1:
         return mutate_gnome_route(gnome)
         # return gnome
@@ -112,7 +111,7 @@ def mutate_gnome_route(gnome):
             gnome_v[r] = gnome_v[r1]
             gnome_v[r1] = temp
             break
-    gnome[vehicle] = ''.join(gnome_v)
+    gnome[vehicle] = gnome_v
     return gnome
 
 # Take a random address from one vehicle to a random other one
@@ -129,13 +128,15 @@ def mutate_gnome_vehicle(gnome):
     if len(gnome[source_v]) == 0:
         return mutate_gnome_vehicle(gnome)
 
-    moved_letter = gnome[source_v][rand_num(0, len(gnome[source_v]))]
-    gnome[source_v] = gnome[source_v].replace(moved_letter, "")
+    moved_location = gnome[source_v][rand_num(0, len(gnome[source_v]))]
+    gnome[source_v].remove(moved_location)
+
     if len(gnome[dest_v]) == 0:
-        gnome[dest_v] = moved_letter
+        gnome[dest_v] = [moved_location]
     else:
-        random_split = rand_num(0, len(gnome[dest_v]))
-        gnome[dest_v] = gnome[dest_v][:random_split] + moved_letter + gnome[dest_v][random_split:]
+        insert_in = rand_num(0, len(gnome[dest_v]))
+        gnome[dest_v].insert(insert_in, moved_location)
+        # gnome[dest_v] = gnome[dest_v][:random_split] + moved_letter + gnome[dest_v][random_split:]
         # gnome[dest_v] = gnome[dest_v] + moved_letter
     
     return gnome
@@ -144,18 +145,19 @@ def mutate_gnome_vehicle(gnome):
 # Function to return a valid GNOME string
 # required to create the population
 def create_gnome():
-    gnome = [""] * NUM_VEHICLES
+    gnome = []
+
+    for _ in range(NUM_VEHICLES):
+        gnome.append([])
     
     for i in range(NUM_LOCATIONS):
         chosen_vehicle = rand_num(0, NUM_VEHICLES)
-        gnome[chosen_vehicle] += str(i)
+        gnome[chosen_vehicle].append(i)
     
     for i in range(len(gnome)):
-        temp = list(gnome[i])
-        random.shuffle(temp)
-        gnome[i] = "".join(temp)
+        random.shuffle(gnome[i])
         
-    # print("final gnome", gnome, cal_fitness(gnome))
+    print("final gnome", gnome, cal_fitness(gnome))
     return gnome
 
 def ewi_distance(place):
@@ -179,8 +181,8 @@ def get_addresses_cost(start, end):
     #     [12, 8, 3, 0, 10],
     #     [5, 40, 3, 10, 0],
     # ]
-    ewi_factor_start = ewi_distance(start)
-    ewi_factor_end = ewi_distance(end)
+    # ewi_factor_start = ewi_distance(start)
+    # ewi_factor_end = ewi_distance(end)
     distance = (BIKE_TIME_MATRIX[start][end], CAR_TIME_MATRIX[start][end]) 
     # distance = (distance[0] + ewi_factor_start[0] + ewi_factor_end[0], distance[1] + ewi_factor_start[1] + ewi_factor_end[1])
     return distance
@@ -198,11 +200,14 @@ def cal_fitness(gnome):
     return f
 
 def fitness_one_vehicle(partial_gnome, vehicle_type):
-    f = 0
+    if len(partial_gnome) == 0:
+        return 0
+    f = ewi_distance(partial_gnome[0])[vehicle_type] + ewi_distance(partial_gnome[-1])[vehicle_type]
+    # print(partial_gnome)
     for i in range(len(partial_gnome) - 1):
-        if get_addresses_cost(ord(partial_gnome[i]) - 48, ord(partial_gnome[i + 1]) - 48)[vehicle_type] == INT_MAX:
-            return INT_MAX
-        f += get_addresses_cost(ord(partial_gnome[i]) - 48, ord(partial_gnome[i + 1]) - 48)[vehicle_type]
+        # if get_addresses_cost(partial_gnome[i], partial_gnome[i + 1])[vehicle_type] == INT_MAX:
+            # return INT_MAX
+        f += get_addresses_cost(partial_gnome[i], partial_gnome[i + 1])[vehicle_type]
 
     return f
 
@@ -244,14 +249,16 @@ def TSPUtil():
     print()
 
     while gen <= NUM_GENERATIONS:
-        new_population = population[0:int(POP_SIZE/2)] # elitism on best 50% of gnomes
+        new_population = population[0:int(POP_SIZE/5)] # elitism on best 20% of gnomes
 
-        for breeding_gnome in population:
-            mutated = mutate_gnome(breeding_gnome.gnome)
-            new_gnome = individual()
-            new_gnome.gnome = mutated
-            new_gnome.fitness = cal_fitness(mutated)
-            new_population.append(new_gnome)
+        for position, breeding_gnome in enumerate(population):
+            nr_of_mutations = max(1, len(population) - position - POP_SIZE + int(POP_SIZE/5))
+            for mut in range(nr_of_mutations):
+                mutated = mutate_gnome(breeding_gnome.gnome)
+                new_gnome = individual()
+                new_gnome.gnome = mutated
+                new_gnome.fitness = cal_fitness(mutated)
+                new_population.append(new_gnome)
         
         population = new_population
         population = list(set(population))

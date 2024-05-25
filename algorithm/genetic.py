@@ -159,7 +159,6 @@ def create_gnome():
     for i in range(len(gnome)):
         random.shuffle(gnome[i])
         
-    print("final gnome", gnome, cal_fitness(gnome))
     return gnome
 
 def ewi_distance(place):
@@ -232,21 +231,15 @@ def RunMaCHazineTSP():
         
         population = new_population
         population = list(set(population))
-        population.sort()
-        population = population[:POP_SIZE]
-
         while len(population) < POP_SIZE:
             temp = individual()
             temp.gnome = create_gnome()
             temp.fitness = cal_fitness(temp.gnome)
             population.append(temp)
-
         population.sort()
+        population = population[:POP_SIZE]
         
-        best_fitness = INT_MAX
-        for pop in population:
-            best_fitness = min(pop.fitness, best_fitness)
-        
+        best_fitness = population[0].fitness
         best_fitness_over_time.append(best_fitness)
         
         if gen % 100 == 0:

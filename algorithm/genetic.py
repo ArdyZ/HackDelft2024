@@ -38,7 +38,12 @@ class individual:
 
     def __gt__(self, other):
         return self.fitness > other.fitness
+    
+    def __eq__(self, other):
+        return self.gnome == other.gnome
 
+    def __hash__(self):
+        return hash(tuple(self.gnome))
 
 # Function to return a random number
 # from start and end
@@ -125,7 +130,7 @@ def create_gnome():
         random.shuffle(temp)
         gnome[i] = "".join(temp)
         
-    print("final gnome", gnome, cal_fitness(gnome))
+    # print("final gnome", gnome, cal_fitness(gnome))
     return gnome
 
 def get_addresses_cost(start, end):
@@ -143,7 +148,7 @@ def get_addresses_cost(start, end):
         [12, 8, 3, 0, 10],
         [5, 40, 3, 10, 0],
     ]
-    return (time_bike[start][end], time_car[start][end])
+    return (time_bike[start][end], time_car[start][end]*1.05) # add 1.05 factor for CO2 reasons
 
 # Function to return the fitness value of a gnome.
 # The fitness value is the path length
@@ -186,72 +191,105 @@ def TSPUtil(mp):
     # Generation Number
     gen = 1
     # Number of Gene Iterations
-    gen_thres = 100
+    gen_thres = 10000
 
     population = []
 
-    # Populating the GNOME pool.
+    # Populating the gnome pool.
     for i in range(POP_SIZE):
         temp = individual()
         temp.gnome = create_gnome()
         temp.fitness = cal_fitness(temp.gnome)
         population.append(temp)
 
+    population.sort()
+
     print("\nInitial population: \nGNOME     FITNESS VALUE\n")
     for i in range(POP_SIZE):
         print(population[i].gnome, population[i].fitness)
     print()
 
-    found = False
-    temperature = 10000
+    while gen <= gen_thres:
+        new_population = population[0:int(POP_SIZE/2)] # elitism on best 50% of gnomes
+
+        for breeding_gnome in population:
+            mutated = mutate_gnome(breeding_gnome.gnome)
+            new_gnome = individual()
+            new_gnome.gnome = mutated
+            new_gnome.fitness = cal_fitness(mutated)
+            new_population.append(new_gnome)
+        
+        population = new_population
+        population = list(set(population))
+        population.sort()
+        population = population[:POP_SIZE]
+
+        while len(population) < POP_SIZE:
+            temp = individual()
+            temp.gnome = create_gnome()
+            temp.fitness = cal_fitness(temp.gnome)
+            population.append(temp)
+
+        population.sort()
+        
+        best_fitness = INT_MAX
+        for pop in population:
+            best_fitness = min(pop.fitness, best_fitness)
+
+        print("\nGeneration", gen, "Best Fitness", best_fitness)
+        print("GNOME     FITNESS VALUE")
+
+        for pop in population:
+            print(pop.gnome, pop.fitness)
+        gen += 1
 
     # Iteration to perform
     # population crossing and gene mutation.
-    while temperature > 100 and gen <= gen_thres:
-        population.sort()
-        print("\nCurrent temp: ", temperature)
-        new_population = []
-
-        for i in range(POP_SIZE):
-            p1 = population[i]
-
-            while True:
-                new_g = mutate_gnome(p1.gnome)
-                new_gnome = individual()
-                new_gnome.gnome = new_g
-                new_gnome.fitness = cal_fitness(new_gnome.gnome)
-
-                if new_gnome.fitness <= population[i].fitness:
-                    new_population.append(new_gnome)
-                    break
-
-                else:
-
-                    # Accepting the rejected children at
-                    # a possible probability above threshold.
-                    prob = pow(
-                        2.7,
-                        -1
-                        * (
-                            (float)(new_gnome.fitness - population[i].fitness)
-                            / temperature
-                        ),
-                    )
-                    if prob > 0.5:
-                        new_population.append(new_gnome)
-                        break
-
-        temperature = cooldown(temperature)
-        population = new_population
-        best_fitness = INT_MAX
-        for i in range(POP_SIZE):
-            best_fitness = min(population[i].fitness, best_fitness)
-        print("Generation", gen, "Best Fitness", best_fitness)
-        print("GNOME     FITNESS VALUE")
-
-        for i in range(POP_SIZE):
-            print(population[i].gnome, population[i].fitness)
-        gen += 1
+    # while temperature > 100 and gen <= gen_thres:
+    #     population.sort()
+    #     print("\nCurrent temp: ", temperature)
+    #     new_population = []
+    #
+    #     for i in range(POP_SIZE):
+    #         p1 = population[i]
+    #
+    #         while True:
+    #             new_g = mutate_gnome(p1.gnome)
+    #             new_gnome = individual()
+    #             new_gnome.gnome = new_g
+    #             new_gnome.fitness = cal_fitness(new_gnome.gnome)
+    #
+    #             if new_gnome.fitness <= population[i].fitness:
+    #                 new_population.append(new_gnome)
+    #                 break
+    #
+    #             else:
+    #
+    #                 # Accepting the rejected children at
+    #                 # a possible probability above threshold.
+    #                 prob = pow(
+    #                     2.7,
+    #                     -1
+    #                     * (
+    #                         (float)(new_gnome.fitness - population[i].fitness)
+    #                         / temperature
+    #                     ),
+    #                 )
+    #                 if prob > 0.5:
+    #                     new_population.append(new_gnome)
+    #                     break
+    #
+    #     temperature = cooldown(temperature)
+    #     population = new_population
+    #     best_fitness = INT_MAX
+    #     for i in range(POP_SIZE):
+    #         best_fitness = min(population[i].fitness, best_fitness)
+    #     print("Generation", gen, "Best Fitness", best_fitness)
+    #     print("GNOME     FITNESS VALUE")
+    #
+    #     for i in range(POP_SIZE):
+    #         print(population[i].gnome, population[i].fitness)
+    #     gen += 1
 
 
 if __name__ == "__main__":

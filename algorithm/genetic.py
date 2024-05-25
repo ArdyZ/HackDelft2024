@@ -1,9 +1,9 @@
 # Python3 implementation of the above approach
-from random import randint
+import random
 import numpy as np
 
 
-INT_MAX = 2147483647
+INT_MAX = 100000000000 # Path not possible 
 # Number of cities in TSP
 V = 5
 
@@ -43,7 +43,7 @@ class individual:
 # Function to return a random number
 # from start and end
 def rand_num(start, end):
-    return randint(start, end-1)
+    return random.randint(start, end-1)
 
 
 # Function to check if the character
@@ -76,24 +76,18 @@ def mutatedGene(gnome):
 # Function to return a valid GNOME string
 # required to create the population
 def create_gnome():
-    gnome = np.zeros((NUM_VEHICLES, V), dtype=int)
-    gnome -= 1
-
-    for city in range(V):
-        picked_vehicle =  rand_num(0, NUM_VEHICLES)
-        gnome[picked_vehicle, city] = 0
-
-    # print("start\n", gnome)
+    gnome = [""] * NUM_VEHICLES
+    
+    for i in range(V):
+        chosen_vehicle = rand_num(0, NUM_VEHICLES)
+        gnome[chosen_vehicle] += str(i)
+    
+    for i in range(len(gnome)):
+        temp = list(gnome[i])
+        random.shuffle(temp)
+        gnome[i] = "".join(temp)
         
-    for vehicle in range(NUM_VEHICLES):
-        zeroes = np.where(gnome[vehicle,:] == 0)[0]
-        order = np.arange(len(zeroes))
-        np.random.shuffle(order)
-        # print("zeroes\n", order)
-        for value, putindex in enumerate(zeroes):
-            gnome[vehicle, putindex] = order[value]
-        
-    print("final\n", gnome)
+    print("final gnome", gnome, cal_fitness(gnome))
     return gnome
 
 def get_addresses_cost(start, end):
@@ -111,18 +105,29 @@ def get_addresses_cost(start, end):
         [12, 8, 3, 0, 10],
         [5, INT_MAX, 3, 10, 0],
     ]
-    return (time_bike[start, end], time_car[start, end])
+    return (time_bike[start][end], time_car[start][end])
 
 # Function to return the fitness value of a gnome.
 # The fitness value is the path length
 # of the path represented by the GNOME.
 def cal_fitness(gnome):
-
     f = 0
     for veh in range(NUM_VEHICLES):
-        pass
+        cur_fitness = fitness_one_vehicle(gnome[veh], 0 if veh < NUM_BIKES else 1)
+        if cur_fitness == INT_MAX:
+            return INT_MAX
+        f += cur_fitness
+    return f
+
+def fitness_one_vehicle(partial_gnome, vehicle_type):
+    f = 0
+    for i in range(len(partial_gnome) - 1):
+        if get_addresses_cost(ord(partial_gnome[i]) - 48, ord(partial_gnome[i + 1]) - 48)[vehicle_type] == INT_MAX:
+            return INT_MAX
+        f += get_addresses_cost(ord(partial_gnome[i]) - 48, ord(partial_gnome[i + 1]) - 48)[vehicle_type]
 
     return f
+
 
 
 # Function to return the updated value

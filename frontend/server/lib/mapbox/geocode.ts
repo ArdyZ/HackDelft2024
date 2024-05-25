@@ -3,6 +3,7 @@ export const lookup = defineCachedFunction(
     const config = useRuntimeConfig();
     const encodedToken = encodeURIComponent(config.mapboxKey);
     const encodedAddress = encodeURIComponent(address);
+
     const res = await $fetch<{
       features: {
         type: "Feature";

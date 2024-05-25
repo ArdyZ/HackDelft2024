@@ -11,9 +11,13 @@ export default defineEventHandler(async (event) => {
     throw query.error;
   }
 
+  if (!query.data.q) {
+    return [];
+  }
+
   return await lookup(query.data.q);
 });
 
 const schema = z.object({
-  q: z.string().min(1).max(200),
+  q: z.string().min(0).max(200),
 });

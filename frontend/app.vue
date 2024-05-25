@@ -1,6 +1,8 @@
 <template>
   <div>
-    <Hacktastic />
+    <Header />
     <NuxtPage />
+
+    <UButton>Hasdsad</UButton>
   </div>
 </template>

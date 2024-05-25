@@ -5,5 +5,6 @@
     <UMain>
       <NuxtPage class="min-h-[calc(100vh-var(--header-height))]" />
     </UMain>
+    <UNotifications />
   </div>
 </template>

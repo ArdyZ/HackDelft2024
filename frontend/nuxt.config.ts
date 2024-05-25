@@ -1,4 +1,7 @@
 export default defineNuxtConfig({
+  devtools: { enabled: true },
+  extends: ["@nuxt/ui-pro"],
+  modules: ["@nuxt/ui", "@nuxt/image", "nuxt3-leaflet"],
   app: {
     head: {
       charset: "utf-8",
@@ -6,7 +9,4 @@ export default defineNuxtConfig({
       link: [{ rel: "icon", type: "image/png", href: "/favicon.png" }],
     },
   },
-  devtools: { enabled: true },
-  extends: ["@nuxt/ui-pro"],
-  modules: ["@nuxt/ui", "@nuxt/image", "nuxt3-leaflet"],
 });

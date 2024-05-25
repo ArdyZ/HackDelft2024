@@ -16,7 +16,9 @@ POP_SIZE = 20
 NUM_BIKES = 3
 NUM_CARS = 1
 
-NUM_GENERATIONS = 1000000
+BIKE_CAPACITY = 20
+
+NUM_GENERATIONS = 200000
 
 NUM_VEHICLES = NUM_BIKES + NUM_CARS
 
@@ -202,6 +204,8 @@ def cal_fitness(gnome):
 def fitness_one_vehicle(partial_gnome, vehicle_type):
     if len(partial_gnome) == 0:
         return 0
+    if vehicle_type == 0 and len(partial_gnome) > BIKE_CAPACITY:
+        return INT_MAX
     f = ewi_distance(partial_gnome[0])[vehicle_type] + ewi_distance(partial_gnome[-1])[vehicle_type]
     # print(partial_gnome)
     for i in range(len(partial_gnome) - 1):
@@ -215,8 +219,8 @@ def fitness_one_vehicle(partial_gnome, vehicle_type):
 
 # Function to return the updated value
 # of the cooling element.
-def cooldown(temp):
-    return (90 * temp) / 100
+# def cooldown(temp):
+    # return (90 * temp) / 100
 
 
 # Comparator for GNOME struct.

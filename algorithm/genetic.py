@@ -151,10 +151,10 @@ def TSPUtil(mp):
     gen_thres = 5
 
     population = []
-    temp = individual()
 
     # Populating the GNOME pool.
     for i in range(POP_SIZE):
+        temp = individual()
         temp.gnome = create_gnome()
         temp.fitness = cal_fitness(temp.gnome)
         population.append(temp)

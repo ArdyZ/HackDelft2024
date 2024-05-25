@@ -36,6 +36,6 @@ export const lookup = defineCachedFunction(
   {
     maxAge: 4 * 60 * 60,
     name: "geocode_lookup",
-    getKey: (address: string) => address,
+    getKey: (address: string) => address.toLowerCase().trim(),
   }
 );

@@ -1,5 +1,5 @@
 <template>
-  <UModal v-model="open">
+  <USlideover v-model="open">
     <UForm
       ref="form"
       :schema="memberCreate"
@@ -8,7 +8,9 @@
       @submit="create"
     >
       <UCard
+        class="flex flex-col flex-1"
         :ui="{
+          body: { base: 'flex-1' },
           ring: '',
           divide: 'divide-y divide-gray-100 dark:divide-gray-800',
         }"
@@ -39,9 +41,48 @@
           :description="err"
         />
 
-        <UFormGroup label="Name" name="name">
+        <UFormGroup label="Name" name="name" class="mb-2">
           <UInput v-model="state.name" />
         </UFormGroup>
+
+        <UFormGroup label="Address" name="address" class="mb-2">
+          <USelectMenu
+            v-model="state.address"
+            :loading="addressLoading"
+            :searchable="searchAddress"
+            option-attribute="fullAddress"
+            searchable-placeholder="Search an Address..."
+            :uiMenu="{ container: 'z-[9999] group' }"
+          />
+        </UFormGroup>
+
+        <div class="h-64 mt-4">
+          <LMap
+            :zoom="14"
+            :center="
+              state.address
+                ? [state.address.coordinates[1], state.address.coordinates[0]]
+                : [51.998752, 4.373719]
+            "
+            ref="map"
+          >
+            <LTileLayer
+              url="https://tile.openstreetmap.de/{z}/{x}/{y}.png"
+              attribution='&amp;copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors'
+              layer-type="base"
+              name="OpenStreetMap"
+            />
+            <LMarker
+              v-if="state.address"
+              :lat-lng="[
+                state.address.coordinates[1],
+                state.address.coordinates[0],
+              ]"
+            >
+              <LTooltip>{{ state.address.name }}</LTooltip>
+            </LMarker>
+          </LMap>
+        </div>
 
         <template #footer>
           <div class="flex justify-end">
@@ -50,7 +91,7 @@
         </template>
       </UCard>
     </UForm>
-  </UModal>
+  </USlideover>
 </template>
 
 <script setup lang="ts">
@@ -64,14 +105,26 @@ const emit = defineEmits<{ created: [] }>();
 const toast = useToast();
 
 const form = ref();
+const addressLoading = ref(false);
 const state = reactive<memberCreate>({
   name: "",
+  address: null as any,
 });
 
 const globalErrors = computed(
   () =>
     form?.value && form.value.getErrors("global").map((err: any) => err.message)
 );
+
+const searchAddress = async (q: string) => {
+  addressLoading.value = true;
+  const addresses = await $fetch("/api/geocode", {
+    params: { q },
+  });
+  addressLoading.value = false;
+
+  return addresses;
+};
 
 const create = async (e: FormSubmitEvent<memberCreate>) => {
   form.value.clear();
@@ -86,6 +139,7 @@ const create = async (e: FormSubmitEvent<memberCreate>) => {
       description: `'${e.data.name}' has been added.`,
     });
     state.name = "";
+    state.address = null as any;
 
     open.value = false;
     emit("created");

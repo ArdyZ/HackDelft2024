@@ -58,6 +58,10 @@ const columns = [
     key: "name",
     sortable: true,
   },
+  {
+    label: "Address",
+    key: "address.fullName",
+  },
 ];
 
 const { data: members, pending, refresh } = await useFetch("/api/member");

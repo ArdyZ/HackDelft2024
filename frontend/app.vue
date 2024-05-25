@@ -2,6 +2,8 @@
   <Title>Hackachazine</Title>
   <div class="min-h-screen">
     <Header />
-    <NuxtPage />
+    <UMain>
+      <NuxtPage class="min-h-[calc(100vh-var(--header-height))]" />
+    </UMain>
   </div>
 </template>

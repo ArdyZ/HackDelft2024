@@ -1,2 +1,3 @@
-# HackDelft2024
+# Hacktastic!
+
 HackDelft 2024

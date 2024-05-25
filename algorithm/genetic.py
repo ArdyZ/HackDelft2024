@@ -1,11 +1,12 @@
 # Python3 implementation of the above approach
 import random
 import numpy as np
+import math
 
 
 INT_MAX = 100000000000 # Path not possible 
 # Number of cities in TSP
-NUM_LOCATIONS = 5
+NUM_LOCATIONS = 10
 
 # Names of the cities
 GENES = "ABCDE"
@@ -22,11 +23,38 @@ NUM_CARS = 1
 
 NUM_VEHICLES = NUM_BIKES + NUM_CARS
 
+
 # Structure of a GNOME
 # defines the path traversed
 # by the salesman while the fitness value
 # of the path is stored in an integer
 
+# Temporary fake matrix generator
+def generate_points(max_range=100):
+    points = [(round(random.uniform(0, max_range),3), round(random.uniform(0, max_range), 3)) for _ in range(POP_SIZE)]
+    return points
+
+def create_distance_matrix():
+    points = generate_points(POP_SIZE)
+    matrix = [[0 for _ in range(len(points))] for _ in range(len(points))]
+    for i, p in enumerate(points):
+        for j, q in enumerate(points): 
+            matrix[i][j] = get_distance(p, q)
+
+    return matrix
+
+def create_ewi_distances(max_range=100):
+    return [round(random.uniform(0, max_range),3) for _ in range(POP_SIZE)]
+
+
+def get_distance(p, q):
+    return math.sqrt((p[0] - q[0]) ** 2 + (p[1] - q[1]) ** 2)
+
+BIKE_TIME_MATRIX = create_distance_matrix()
+CAR_TIME_MATRIX = create_distance_matrix()
+
+BIKE_TIME_EWI = create_ewi_distances()
+CAR_TIME_EWI = create_ewi_distances()
 
 class individual:
     def __init__(self) -> None:
@@ -133,22 +161,32 @@ def create_gnome():
     # print("final gnome", gnome, cal_fitness(gnome))
     return gnome
 
+def ewi_distance(place):
+    # time_bike = [3, 4, 7, 1, 5]
+    # time_car = [2, 6, 4, INT_MAX, 3]
+    return (BIKE_TIME_EWI[place], CAR_TIME_EWI[place]) 
+
+
 def get_addresses_cost(start, end):
-    time_bike = [
-        [0, 4, 2, 10, 10],
-        [4, 0, 9, 8, 100],
-        [2, 9, 0, 3, 3],
-        [10, 8, 3, 0, 13],
-        [10, 100, 3, 13, 0],
-    ]
-    time_car = [
-        [0, 2, INT_MAX, 12, 5],
-        [2, 0, 4, 8, 40],
-        [INT_MAX, 4, 0, 3, 3],
-        [12, 8, 3, 0, 10],
-        [5, 40, 3, 10, 0],
-    ]
-    return (time_bike[start][end], time_car[start][end]*1.05) # add 1.05 factor for CO2 reasons
+    # time_bike = [
+    #     [0, 4, 2, 10, 10],
+    #     [4, 0, 9, 8, 100],
+    #     [2, 9, 0, 3, 3],
+    #     [10, 8, 3, 0, 13],
+    #     [10, 100, 3, 13, 0],
+    # ]
+    # time_car = [
+    #     [0, 2, INT_MAX, 12, 5],
+    #     [2, 0, 4, 8, 40],
+    #     [INT_MAX, 4, 0, 3, 3],
+    #     [12, 8, 3, 0, 10],
+    #     [5, 40, 3, 10, 0],
+    # ]
+    ewi_factor_start = ewi_distance(start)
+    ewi_factor_end = ewi_distance(end)
+    distance = (BIKE_TIME_MATRIX[start][end], CAR_TIME_MATRIX[start][end]) 
+    # distance = (distance[0] + ewi_factor_start[0] + ewi_factor_end[0], distance[1] + ewi_factor_start[1] + ewi_factor_end[1])
+    return distance
 
 # Function to return the fitness value of a gnome.
 # The fitness value is the path length
@@ -187,13 +225,15 @@ def cooldown(temp):
 
 
 # Utility function for TSP problem.
-def TSPUtil(mp):
+def TSPUtil():
     # Generation Number
     gen = 1
     # Number of Gene Iterations
     gen_thres = 10000
 
     population = []
+
+    best_fitness_over_time = []
 
     # Populating the gnome pool.
     for i in range(POP_SIZE):
@@ -235,6 +275,8 @@ def TSPUtil(mp):
         best_fitness = INT_MAX
         for pop in population:
             best_fitness = min(pop.fitness, best_fitness)
+        
+        best_fitness_over_time.append(best_fitness)
 
         print("\nGeneration", gen, "Best Fitness", best_fitness)
         print("GNOME     FITNESS VALUE")
@@ -242,6 +284,8 @@ def TSPUtil(mp):
         for pop in population:
             print(pop.gnome, pop.fitness)
         gen += 1
+
+    
 
     # Iteration to perform
     # population crossing and gene mutation.
@@ -294,12 +338,14 @@ def TSPUtil(mp):
 
 if __name__ == "__main__":
 
-    mp = [
-        [0, 2, INT_MAX, 12, 5],
-        [2, 0, 4, 8, INT_MAX],
-        [INT_MAX, 4, 0, 3, 3],
-        [12, 8, 3, 0, 10],
-        [5, INT_MAX, 3, 10, 0],
-    ]
-    TSPUtil(mp)
+    # mp = [
+    #     [0, 2, INT_MAX, 12, 5],
+    #     [2, 0, 4, 8, INT_MAX],
+    #     [INT_MAX, 4, 0, 3, 3],
+    #     [12, 8, 3, 0, 10],
+    #     [5, INT_MAX, 3, 10, 0],
+    # ]
+    TSPUtil()
+
+
 

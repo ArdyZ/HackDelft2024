@@ -6,7 +6,7 @@
       layer-type="base"
       name="OpenStreetMap"
     />
-    <LMarker :lat-lng="[41.8329, -87.7327]">
+    <LMarker v-for="waypoint in waypoints" :key="waypoint.lat + waypoint.lng" :lat-lng="[waypoint.lat, waypoint.lng]">
       <LTooltip> Hi! I'm staying here on this location! </LTooltip>
     </LMarker>
   </LMap>

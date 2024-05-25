@@ -17,6 +17,7 @@ NUM_BIKES = 3
 NUM_CARS = 1
 
 BIKE_CAPACITY = 20
+CAR_PENALTY = 1.20 # Percentage penalty for using a car
 
 NUM_GENERATIONS = 200000
 
@@ -212,7 +213,9 @@ def fitness_one_vehicle(partial_gnome, vehicle_type):
         # if get_addresses_cost(partial_gnome[i], partial_gnome[i + 1])[vehicle_type] == INT_MAX:
             # return INT_MAX
         f += get_addresses_cost(partial_gnome[i], partial_gnome[i + 1])[vehicle_type]
-
+    
+    if vehicle_type == 1:
+        f *= CAR_PENALTY
     return f
 
 

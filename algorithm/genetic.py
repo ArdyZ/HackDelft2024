@@ -5,7 +5,7 @@ import numpy as np
 
 INT_MAX = 100000000000 # Path not possible 
 # Number of cities in TSP
-V = 5
+NUM_LOCATIONS = 5
 
 # Names of the cities
 GENES = "ABCDE"
@@ -73,6 +73,7 @@ def mutate_gnome_route(gnome):
     gnome_v = list(gnome[vehicle])
     if len(gnome_v) == 0 or len(gnome_v) == 1:
         return mutate_gnome_route(gnome)
+        # return gnome
     while True:
         r = rand_num(0, len(gnome_v))
         r1 = rand_num(0, len(gnome_v))
@@ -89,6 +90,7 @@ def mutate_gnome_vehicle(gnome):
     source_v = rand_num(0, NUM_VEHICLES)
     dest_v = rand_num(0, NUM_VEHICLES)
     if source_v == dest_v:
+        # return gnome
         return mutate_gnome_vehicle(gnome)
 
     # gnome_v_source = gnome[source_v]
@@ -99,9 +101,13 @@ def mutate_gnome_vehicle(gnome):
 
     moved_letter = gnome[source_v][rand_num(0, len(gnome[source_v]))]
     gnome[source_v] = gnome[source_v].replace(moved_letter, "")
-    gnome[dest_v] = gnome[dest_v] + moved_letter
+    if len(gnome[dest_v]) == 0:
+        gnome[dest_v] = moved_letter
+    else:
+        random_split = rand_num(0, len(gnome[dest_v]))
+        gnome[dest_v] = gnome[dest_v][:random_split] + moved_letter + gnome[dest_v][random_split:]
+        # gnome[dest_v] = gnome[dest_v] + moved_letter
     
-
     return gnome
 
 
@@ -110,7 +116,7 @@ def mutate_gnome_vehicle(gnome):
 def create_gnome():
     gnome = [""] * NUM_VEHICLES
     
-    for i in range(V):
+    for i in range(NUM_LOCATIONS):
         chosen_vehicle = rand_num(0, NUM_VEHICLES)
         gnome[chosen_vehicle] += str(i)
     

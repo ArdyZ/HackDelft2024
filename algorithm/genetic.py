@@ -60,17 +60,49 @@ def repeat(s, ch):
 # Mutated GNOME is a string
 # with a random interchange
 # of two genes to create variation in species
-def mutatedGene(gnome):
-    gnome = list(gnome)
+def mutate_gnome(gnome):
+    mutation_type = rand_num(0, 2) # 0 is change route, 1 is change vehicle
+    if mutation_type == 0:
+        return mutate_gnome_route(gnome)
+    else:
+        return mutate_gnome_vehicle(gnome)
+
+# Change the order of two destinations within one vehicle
+def mutate_gnome_route(gnome):
+    vehicle = rand_num(0, NUM_VEHICLES)
+    gnome_v = list(gnome[vehicle])
+    if len(gnome_v) == 0 or len(gnome_v) == 1:
+        return mutate_gnome_route(gnome)
     while True:
-        r = rand_num(1, V)
-        r1 = rand_num(1, V)
+        r = rand_num(0, len(gnome_v))
+        r1 = rand_num(0, len(gnome_v))
         if r1 != r:
-            temp = gnome[r]
-            gnome[r] = gnome[r1]
-            gnome[r1] = temp
+            temp = gnome_v[r]
+            gnome_v[r] = gnome_v[r1]
+            gnome_v[r1] = temp
             break
-    return ''.join(gnome)
+    gnome[vehicle] = ''.join(gnome_v)
+    return gnome
+
+# Take a random address from one vehicle to a random other one
+def mutate_gnome_vehicle(gnome):
+    source_v = rand_num(0, NUM_VEHICLES)
+    dest_v = rand_num(0, NUM_VEHICLES)
+    if source_v == dest_v:
+        return mutate_gnome_vehicle(gnome)
+
+    # gnome_v_source = gnome[source_v]
+    # gnome_v_dest = gnome[dest_v]
+
+    if len(gnome[source_v]) == 0:
+        return mutate_gnome_vehicle(gnome)
+
+    moved_letter = gnome[source_v][rand_num(0, len(gnome[source_v]))]
+    gnome[source_v] = gnome[source_v].replace(moved_letter, "")
+    gnome[dest_v] = gnome[dest_v] + moved_letter
+    
+
+    return gnome
 
 
 # Function to return a valid GNOME string
@@ -92,18 +124,18 @@ def create_gnome():
 
 def get_addresses_cost(start, end):
     time_bike = [
-        [0, 4, INT_MAX, 10, 10],
-        [4, 0, 9, 8, INT_MAX],
-        [INT_MAX, 9, 0, 3, 3],
+        [0, 4, 2, 10, 10],
+        [4, 0, 9, 8, 100],
+        [2, 9, 0, 3, 3],
         [10, 8, 3, 0, 13],
-        [10, INT_MAX, 3, 13, 0],
+        [10, 100, 3, 13, 0],
     ]
     time_car = [
         [0, 2, INT_MAX, 12, 5],
-        [2, 0, 4, 8, INT_MAX],
+        [2, 0, 4, 8, 40],
         [INT_MAX, 4, 0, 3, 3],
         [12, 8, 3, 0, 10],
-        [5, INT_MAX, 3, 10, 0],
+        [5, 40, 3, 10, 0],
     ]
     return (time_bike[start][end], time_car[start][end])
 
@@ -148,7 +180,7 @@ def TSPUtil(mp):
     # Generation Number
     gen = 1
     # Number of Gene Iterations
-    gen_thres = 5
+    gen_thres = 100
 
     population = []
 
@@ -169,7 +201,7 @@ def TSPUtil(mp):
 
     # Iteration to perform
     # population crossing and gene mutation.
-    while temperature > 1000 and gen <= gen_thres:
+    while temperature > 100 and gen <= gen_thres:
         population.sort()
         print("\nCurrent temp: ", temperature)
         new_population = []
@@ -178,7 +210,7 @@ def TSPUtil(mp):
             p1 = population[i]
 
             while True:
-                new_g = mutatedGene(p1.gnome)
+                new_g = mutate_gnome(p1.gnome)
                 new_gnome = individual()
                 new_gnome.gnome = new_g
                 new_gnome.fitness = cal_fitness(new_gnome.gnome)
@@ -205,7 +237,10 @@ def TSPUtil(mp):
 
         temperature = cooldown(temperature)
         population = new_population
-        print("Generation", gen)
+        best_fitness = INT_MAX
+        for i in range(POP_SIZE):
+            best_fitness = min(population[i].fitness, best_fitness)
+        print("Generation", gen, "Best Fitness", best_fitness)
         print("GNOME     FITNESS VALUE")
 
         for i in range(POP_SIZE):

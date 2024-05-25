@@ -61,7 +61,10 @@
             :zoom="14"
             :center="
               state.address
-                ? [state.address.coordinates[1], state.address.coordinates[0]]
+                ? [
+                    state.address.coordinates.latitude,
+                    state.address.coordinates.longitude,
+                  ]
                 : [51.998752, 4.373719]
             "
             ref="map"
@@ -75,8 +78,8 @@
             <LMarker
               v-if="state.address"
               :lat-lng="[
-                state.address.coordinates[1],
-                state.address.coordinates[0],
+                state.address.coordinates.latitude,
+                state.address.coordinates.longitude,
               ]"
             >
               <LTooltip>{{ state.address.name }}</LTooltip>

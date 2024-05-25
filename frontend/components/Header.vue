@@ -15,6 +15,11 @@ const links = [
     icon: "i-heroicons-users-solid",
     to: "/members",
   },
+  {
+    label: "Map",
+    icon: "i-heroicons-map",
+    to: "/map",
+  },
 ];
 </script>
 

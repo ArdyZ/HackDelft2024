@@ -30,7 +30,10 @@ export const lookup = defineCachedFunction(
     return res.features.map((feature) => ({
       name: feature.properties.name_preferred,
       fullAddress: feature.properties.full_address,
-      coordinates: feature.geometry.coordinates,
+      coordinates: {
+        longitude: feature.geometry.coordinates[0],
+        latitude: feature.geometry.coordinates[1],
+      },
     }));
   },
   {

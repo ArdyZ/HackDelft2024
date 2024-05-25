@@ -5,7 +5,10 @@ export const create = z.object({
   address: z.object({
     name: z.string().min(3).max(120),
     fullAddress: z.string().min(3).max(120),
-    coordinates: z.tuple([z.number(), z.number()]),
+    coordinates: z.object({
+      latitude: z.number(),
+      longitude: z.number(),
+    }),
   }),
 });
 export type create = z.infer<typeof create>;

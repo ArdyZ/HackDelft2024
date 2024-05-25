@@ -56,7 +56,7 @@
 <script setup lang="ts">
 import type { FormSubmitEvent } from "#ui/types";
 
-import { create as memberCreate } from "../../schema/member";
+import { create as memberCreate } from "../../server/lib/validation/member";
 
 const open = defineModel<boolean>("open");
 const emit = defineEmits<{ created: [] }>();

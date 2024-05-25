@@ -1,19 +1,24 @@
 <script setup lang="ts">
 const links = [
   {
-    label: "Docs",
+    label: "Start",
     icon: "i-heroicons-book-open",
-    to: "/getting-started",
-  },
-  {
-    label: "Pro",
-    icon: "i-heroicons-square-3-stack-3d",
-    to: "/pro",
+    to: "/",
   },
   {
     label: "Releases",
     icon: "i-heroicons-rocket-launch",
     to: "/releases",
+  },
+  {
+    label: "Members",
+    icon: "i-heroicons-users-solid",
+    to: "/members",
+  },
+  {
+    label: "Homes",
+    icon: "i-heroicons-home",
+    to: "/homes",
   },
 ];
 </script>
@@ -22,7 +27,7 @@ const links = [
   <UHeader :links="links">
     <template #logo>
       <UColorModeImage
-        class="w-auto h-8"
+        class="w-auto h-8 max-sm:invisible"
         light="/logos/indigo.png"
         dark="/logos/white.png"
       />
@@ -31,9 +36,5 @@ const links = [
     <template #right>
       <UColorModeButton />
     </template>
-
-    <!-- <template #panel> -->
-    <!-- <UNavigationTree :links="mapContentNavigation(navigation)" /> -->
-    <!-- </template> -->
   </UHeader>
 </template>

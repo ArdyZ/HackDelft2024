@@ -2,24 +2,21 @@
 import random
 import numpy as np
 import math
+import matplotlib.pyplot as plt
 
 
-INT_MAX = 100000000000 # Path not possible 
+INT_MAX = 100000000000 
 # Number of cities in TSP
 NUM_LOCATIONS = 10
-
-# Names of the cities
-GENES = "ABCDE"
-
-# Starting Node Value
-START = 0
 
 # Initial population size for the algorithm
 POP_SIZE = 10
 
 # Vehicles
-NUM_BIKES = 1
-NUM_CARS = 1
+NUM_BIKES = 2
+NUM_CARS = 2
+
+NUM_GENERATIONS = 100000
 
 NUM_VEHICLES = NUM_BIKES + NUM_CARS
 
@@ -228,9 +225,6 @@ def cooldown(temp):
 def TSPUtil():
     # Generation Number
     gen = 1
-    # Number of Gene Iterations
-    gen_thres = 10000
-
     population = []
 
     best_fitness_over_time = []
@@ -249,7 +243,7 @@ def TSPUtil():
         print(population[i].gnome, population[i].fitness)
     print()
 
-    while gen <= gen_thres:
+    while gen <= NUM_GENERATIONS:
         new_population = population[0:int(POP_SIZE/2)] # elitism on best 50% of gnomes
 
         for breeding_gnome in population:
@@ -277,15 +271,24 @@ def TSPUtil():
             best_fitness = min(pop.fitness, best_fitness)
         
         best_fitness_over_time.append(best_fitness)
-
-        print("\nGeneration", gen, "Best Fitness", best_fitness)
-        print("GNOME     FITNESS VALUE")
-
-        for pop in population:
-            print(pop.gnome, pop.fitness)
+        
+        if gen % 100 == 0:
+            print("\nGeneration", gen, "Best Fitness", best_fitness)
+            print("GNOME     FITNESS VALUE")
+            for pop in population:
+                print(pop.gnome, pop.fitness)
         gen += 1
 
+    print("\nFinal Generation", "Best Fitness", best_fitness)
+    print("GNOME     FITNESS VALUE")
+    for pop in population:
+        print(pop.gnome, pop.fitness)
     
+    x = np.arange(len(best_fitness_over_time))  # X-axis points
+    y = best_fitness_over_time # Y-axis points
+ 
+    plt.plot(x, y)  # Plot the chart
+    plt.show()  # display
 
     # Iteration to perform
     # population crossing and gene mutation.

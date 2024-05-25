@@ -1,4 +1,4 @@
-import { create as memberCreate } from "../../../schema/member";
+import { create as memberCreate } from "../../lib/validation/member";
 
 export default defineEventHandler(async (event) => {
   const result = await readValidatedBody(event, (body) =>

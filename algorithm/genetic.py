@@ -1,4 +1,3 @@
-# Python3 implementation of the above approach
 import random
 import numpy as np
 import math
@@ -164,31 +163,11 @@ def create_gnome():
     return gnome
 
 def ewi_distance(place):
-    # time_bike = [3, 4, 7, 1, 5]
-    # time_car = [2, 6, 4, INT_MAX, 3]
     return (BIKE_TIME_EWI[place], CAR_TIME_EWI[place]) 
 
 
 def get_addresses_cost(start, end):
-    # time_bike = [
-    #     [0, 4, 2, 10, 10],
-    #     [4, 0, 9, 8, 100],
-    #     [2, 9, 0, 3, 3],
-    #     [10, 8, 3, 0, 13],
-    #     [10, 100, 3, 13, 0],
-    # ]
-    # time_car = [
-    #     [0, 2, INT_MAX, 12, 5],
-    #     [2, 0, 4, 8, 40],
-    #     [INT_MAX, 4, 0, 3, 3],
-    #     [12, 8, 3, 0, 10],
-    #     [5, 40, 3, 10, 0],
-    # ]
-    # ewi_factor_start = ewi_distance(start)
-    # ewi_factor_end = ewi_distance(end)
-    distance = (BIKE_TIME_MATRIX[start][end], CAR_TIME_MATRIX[start][end]) 
-    # distance = (distance[0] + ewi_factor_start[0] + ewi_factor_end[0], distance[1] + ewi_factor_start[1] + ewi_factor_end[1])
-    return distance
+    return (BIKE_TIME_MATRIX[start][end], CAR_TIME_MATRIX[start][end]) 
 
 # Function to return the fitness value of a gnome.
 # The fitness value is the path length
@@ -218,23 +197,7 @@ def fitness_one_vehicle(partial_gnome, vehicle_type):
         f *= CAR_PENALTY
     return f
 
-
-
-# Function to return the updated value
-# of the cooling element.
-# def cooldown(temp):
-    # return (90 * temp) / 100
-
-
-# Comparator for GNOME struct.
-# def lessthan(individual t1,
-#               individual t2)
-# :
-#     return t1.fitness < t2.fitness
-
-
-# Utility function for TSP problem.
-def TSPUtil():
+def RunMaCHazineTSP():
     # Generation Number
     gen = 1
     population = []
@@ -304,65 +267,8 @@ def TSPUtil():
     plt.plot(x, y)  # Plot the chart
     plt.show()  # display
 
-    # Iteration to perform
-    # population crossing and gene mutation.
-    # while temperature > 100 and gen <= gen_thres:
-    #     population.sort()
-    #     print("\nCurrent temp: ", temperature)
-    #     new_population = []
-    #
-    #     for i in range(POP_SIZE):
-    #         p1 = population[i]
-    #
-    #         while True:
-    #             new_g = mutate_gnome(p1.gnome)
-    #             new_gnome = individual()
-    #             new_gnome.gnome = new_g
-    #             new_gnome.fitness = cal_fitness(new_gnome.gnome)
-    #
-    #             if new_gnome.fitness <= population[i].fitness:
-    #                 new_population.append(new_gnome)
-    #                 break
-    #
-    #             else:
-    #
-    #                 # Accepting the rejected children at
-    #                 # a possible probability above threshold.
-    #                 prob = pow(
-    #                     2.7,
-    #                     -1
-    #                     * (
-    #                         (float)(new_gnome.fitness - population[i].fitness)
-    #                         / temperature
-    #                     ),
-    #                 )
-    #                 if prob > 0.5:
-    #                     new_population.append(new_gnome)
-    #                     break
-    #
-    #     temperature = cooldown(temperature)
-    #     population = new_population
-    #     best_fitness = INT_MAX
-    #     for i in range(POP_SIZE):
-    #         best_fitness = min(population[i].fitness, best_fitness)
-    #     print("Generation", gen, "Best Fitness", best_fitness)
-    #     print("GNOME     FITNESS VALUE")
-    #
-    #     for i in range(POP_SIZE):
-    #         print(population[i].gnome, population[i].fitness)
-    #     gen += 1
-
 
 if __name__ == "__main__":
-
-    # mp = [
-    #     [0, 2, INT_MAX, 12, 5],
-    #     [2, 0, 4, 8, INT_MAX],
-    #     [INT_MAX, 4, 0, 3, 3],
-    #     [12, 8, 3, 0, 10],
-    #     [5, INT_MAX, 3, 10, 0],
-    # ]
-    TSPUtil()
-
+   RunMaCHazineTSP()
 
 

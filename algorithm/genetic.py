@@ -3,16 +3,18 @@ import numpy as np
 import math
 import matplotlib.pyplot as plt
 import copy
+import functools
+import operator
 
 INT_MAX = 100000000000 
 # Number of cities in TSP
-NUM_LOCATIONS = 30
+NUM_LOCATIONS = 10
 
 # Initial population size for the algorithm
 POP_SIZE = 20
 
 # Vehicles
-NUM_BIKES = 3
+NUM_BIKES = 2
 NUM_CARS = 1
 
 BIKE_CAPACITY = 20
@@ -173,6 +175,35 @@ def ewi_distance(place):
 def get_addresses_cost(start, end):
     return (BIKE_TIME_MATRIX[start][end], CAR_TIME_MATRIX[start][end]) 
 
+def gnome_offspring(partner1, partner2):
+    structure_of_child = [len(x) for x in partner1]
+
+    partner1 = functools.reduce(operator.iconcat, partner1, [])
+    partner2 = functools.reduce(operator.iconcat, partner2, [])
+
+    cutoff_point = rand_num(0, len(partner1))
+
+    unstructured_child = []
+
+    for i, current_address in enumerate(partner1):
+        if i <= cutoff_point:
+            unstructured_child.append(current_address)
+            
+            # in partner2, swap index of current_address with i
+            location_of_current_address_in_p2 = partner2.index(current_address)
+            partner2[i], partner2[location_of_current_address_in_p2] = partner2[location_of_current_address_in_p2], partner2[i]
+        else:
+            unstructured_child.append(partner2[i])
+
+    structured_child = []
+    for veh in structure_of_child:
+        structured_child.append([])
+        for _ in range(veh):
+            structured_child[-1].append(unstructured_child[0])
+            unstructured_child = unstructured_child[1:]
+
+    return structured_child
+
 # Function to return the fitness value of a gnome.
 # The fitness value is the path length
 # of the path represented by the GNOME.
@@ -224,6 +255,9 @@ def RunMaCHazineTSP():
 
     while gen <= NUM_GENERATIONS:
         new_population = population[0:int(POP_SIZE/5)] # elitism on best 20% of gnomes
+
+        gnome_offspring(population[0].gnome, population[1].gnome)
+        input()
 
         for position, breeding_gnome in enumerate(population):
             nr_of_mutations = max(1, len(population) - position - POP_SIZE + int(POP_SIZE/5))

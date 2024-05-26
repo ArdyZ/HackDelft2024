@@ -7,8 +7,9 @@ import functools
 import requests
 import operator
 import json
+import sys
 
-INT_MAX = 100000000000
+INT_MAX = 10000000000000000
 # Number of cities in TSP
 NUM_LOCATIONS = 25
 
@@ -341,16 +342,20 @@ def RunMaCHazineTSP():
     # print("GNOME     FITNESS VALUE")
     # for pop in population:
     #     print(pop.gnome, pop.fitness)
-    #
+
     # x = np.arange(len(best_fitness_over_time))  # X-axis points
     # y = best_fitness_over_time # Y-axis points
     #
     # plt.plot(x, y)  # Plot the chart
     # plt.show()  # display
-    #
+
     return population[0]
 
 if __name__ == "__main__":
+    NUM_CARS = int(sys.argv[1])
+    NUM_BIKES = int(sys.argv[2])
+    BIKE_CAPACITY = int(sys.argv[3])
+    # print(sys.argv)
     best_pop = individual()
     best_pop.fitness = INT_MAX
     for _ in range(NUM_RUNS):

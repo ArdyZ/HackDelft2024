@@ -13,7 +13,12 @@ export default defineEventHandler(async (event) => {
 
   const eventStream = createEventStream(event);
 
-  const algo = spawn("python3", ["../algorithm/genetic.py"]);
+  const algo = spawn("python3", [
+    "../algorithm/genetic.py",
+    result.data.carsAvailable.toString(),
+    result.data.bikesAvailable.toString(),
+    result.data.bikesCapacity.toString(),
+  ]);
 
   algo.stdout.on("data", (buf) => {
     const data = JSON.parse(buf.toString());

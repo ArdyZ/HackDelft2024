@@ -10,6 +10,14 @@ export default defineEventHandler(async (event) => {
     throw query.error;
   }
 
+  if (query.data.a === 0 || query.data.b === 0) {
+    return await $fetch(
+      `/api/distanceEwi?b=${query.data.a || query.data.b}&type=${
+        query.data.type
+      }`
+    );
+  }
+
   const members = await $fetch("/api/member");
   const a = members.find((member) => member.id === query.data.a);
   const b = members.find((member) => member.id === query.data.b);
@@ -18,11 +26,15 @@ export default defineEventHandler(async (event) => {
   if (!a || !b) {
     throw createError("One of the members is not found.");
   }
-  return await calculateDistance(a.address.coordinates, b.address.coordinates, type);
+  return await calculateDistance(
+    a.address.coordinates,
+    b.address.coordinates,
+    type
+  );
 });
 
 const schema = z.object({
   a: z.coerce.number().min(0),
   b: z.coerce.number().min(0),
-  type: z.enum(["driving", "cycling"])
+  type: z.enum(["driving", "cycling"]),
 });

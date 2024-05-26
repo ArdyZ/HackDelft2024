@@ -25,8 +25,14 @@
     >
       <LTooltip>{{ member.name }} | {{ member.address.name }}</LTooltip>
     </LMarker>
-    <LPolyline v-for="route in routeCoords" :lat-lngs="route" color="red" />
-    <LPolyline v-for="route in routeCoords2" :lat-lngs="route" color="blue" />
+    <div v-for="(route, i) in currentWaypoints" :key="route.toString()">
+      <LPolyline
+        v-for="(e, j) in route"
+        :key="j"
+        :lat-lngs="e"
+        :color="colors[i]"
+      />
+    </div>
   </LMap>
 
   <UForm
@@ -86,33 +92,19 @@ import {
 import { start as startSchema } from "../server/lib/validation/start";
 
 const { data: members } = await useFetch("/api/member");
-const { data: route1 } = await useFetch("/api/distance?a=17&b=19&type=driving");
-const { data: route2 } = await useFetch("/api/distance?a=19&b=24&type=driving");
-const { data: route3 } = await useFetch("/api/distance?a=19&b=24&type=cycling");
 
-const routeCoords = computed(() => {
-  const routes = [route1, route2];
-  return routes.map((route) =>
-    route.value
-      ? route.value.geometry.map((coord) => ({
-          lat: coord.latitude,
-          lng: coord.longitude,
-        }))
-      : []
-  );
-});
+const edgeCache = reactive<{ [key: string]: { lat: number; lng: number }[] }>(
+  {}
+);
+const currentRoutes = ref<string[][]>([]);
 
-const routeCoords2 = computed(() => {
-  const routes = [route3];
-  return routes.map((route) =>
-    route.value
-      ? route.value.geometry.map((coord) => ({
-          lat: coord.latitude,
-          lng: coord.longitude,
-        }))
-      : []
-  );
-});
+const currentWaypoints = computed(() =>
+  currentRoutes.value.map((r) => r.map((e) => edgeCache[e] ?? []))
+);
+
+const requested = ref<string[]>([]);
+const colors = ref<string[]>([]);
+const iter = ref<number>(0);
 
 const state = reactive<startSchema>({
   carsAvailable: 1,
@@ -120,18 +112,113 @@ const state = reactive<startSchema>({
   bikesCapacity: 20,
 });
 
+const fetchEdge = async (a: number, b: number, type: "driving" | "cycling") => {
+  const key = genKey(a, b, type);
+
+  if (edgeCache[key] || requested.value.indexOf(key) >= 0) {
+    return;
+  }
+
+  requested.value.push(key);
+
+  const { data } = await useFetch(`/api/distance?a=${a}&b=${b}&type=${type}`);
+  if (!data.value) {
+    console.log(data.value);
+    return [];
+  }
+
+  edgeCache[key] = data.value.geometry.map((p) => ({
+    lat: p.latitude,
+    lng: p.longitude,
+  }));
+
+  return data.value;
+};
+
 const start = () => {
+  currentRoutes.value = [];
   let query = "";
   query += `carsAvailable=${encodeURIComponent(state.carsAvailable)}`;
   query += `&bikesAvailable=${encodeURIComponent(state.bikesAvailable)}`;
   query += `&bikesCapacity=${encodeURIComponent(state.bikesCapacity)}`;
 
+  for (let i = 0; i <= state.carsAvailable + state.bikesAvailable; i++) {
+    colors.value.push(getRandomColor());
+  }
+
   const eventSource = new EventSource(
     `http://localhost:3000/api/start?${query}`
   );
 
-  eventSource.onmessage = (event) => {
-    console.log(event.data);
+  eventSource.onmessage = (event: MessageEvent<string>) => {
+    iter.value += 1;
+
+    if (iter.value % 10) {
+      return;
+    }
+
+    const routes = JSON.parse(event.data).route;
+    const newRoutes = [
+      ...routes.slice(0, state.carsAvailable).map((r: any) => {
+        const path = [];
+
+        if (r[0]) {
+          path.push(genKey(0, r[0], "driving"));
+          fetchEdge(0, r[0], "driving");
+        }
+
+        for (let i = 0; i < r.length - 1; i++) {
+          path.push(genKey(r[i], r[i + 1], "driving"));
+          fetchEdge(r[i], r[i + 1], "driving");
+        }
+
+        if (r[0]) {
+          path.push(genKey(r[r.length - 1], 0, "driving"));
+          fetchEdge(r[r.length - 1], 0, "driving");
+        }
+
+        return path;
+      }),
+      ...routes.slice(state.carsAvailable).map((r: any) => {
+        const path = [];
+
+        if (r[0]) {
+          path.push(genKey(0, r[0], "driving"));
+          fetchEdge(0, r[0], "driving");
+        }
+
+        for (let i = 0; i < r.length - 1; i++) {
+          path.push(genKey(r[i], r[i + 1], "cycling"));
+          fetchEdge(r[i], r[i + 1], "cycling");
+        }
+
+        if (r[0]) {
+          path.push(genKey(r[r.length - 1], 0, "driving"));
+          fetchEdge(r[r.length - 1], 0, "driving");
+        }
+
+        return path;
+      }),
+    ];
+
+    currentRoutes.value = newRoutes;
   };
+};
+
+const genKey = (a: number, b: number, type: "driving" | "cycling") => {
+  if (a > b) {
+    return `${a.toString()}|${b.toString()}|${type}`;
+  } else {
+    return `${b.toString()}|${a.toString()}|${type}`;
+  }
+};
+
+const getRandomColor = () => {
+  var letters = "0123456789ABCDEF";
+  var color = "#";
+  for (var i = 0; i < 6; i++) {
+    color += letters[Math.floor(Math.random() * 16)];
+  }
+  return color;
 };
 </script>

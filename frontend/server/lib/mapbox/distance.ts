@@ -10,6 +10,10 @@ export const calculateDistance = defineCachedFunction(
       `${a.longitude},${a.latitude};${b.longitude},${b.latitude}`
     );
 
+    console.info(
+      `Calculating the ${type} distance between ${a.longitude},${a.latitude} and ${b.longitude},${b.latitude}.`
+    );
+
     const res = await $fetch<{
       routes: {
         weight: number;

@@ -4,6 +4,8 @@ export const lookup = defineCachedFunction(
     const encodedToken = encodeURIComponent(config.mapboxKey);
     const encodedAddress = encodeURIComponent(address);
 
+    console.info(`Geocoding ${address}.`);
+
     const res = await $fetch<{
       features: {
         type: "Feature";

@@ -257,7 +257,6 @@ def RunMaCHazineTSP():
         new_population = population[0:int(POP_SIZE/5)] # elitism on best 20% of gnomes
 
         gnome_offspring(population[0].gnome, population[1].gnome)
-        input()
 
         for position, breeding_gnome in enumerate(population):
             nr_of_mutations = max(1, len(population) - position - POP_SIZE + int(POP_SIZE/5))

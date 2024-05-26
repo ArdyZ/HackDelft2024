@@ -8,7 +8,7 @@ import operator
 
 INT_MAX = 100000000000 
 # Number of cities in TSP
-NUM_LOCATIONS = 10
+NUM_LOCATIONS = 30
 
 # Initial population size for the algorithm
 POP_SIZE = 20
@@ -20,7 +20,7 @@ NUM_CARS = 1
 BIKE_CAPACITY = 20
 CAR_PENALTY = 1.20 # Percentage penalty for using a car
 
-NUM_GENERATIONS = 200000
+NUM_GENERATIONS = 100000
 
 NUM_VEHICLES = NUM_BIKES + NUM_CARS
 
@@ -181,7 +181,7 @@ def gnome_offspring(partner1, partner2):
     partner1 = functools.reduce(operator.iconcat, partner1, [])
     partner2 = functools.reduce(operator.iconcat, partner2, [])
 
-    cutoff_point = rand_num(0, len(partner1))
+    cutoff_point = rand_num(1, len(partner1) - 1)
 
     unstructured_child = []
 
@@ -255,9 +255,22 @@ def RunMaCHazineTSP():
 
     while gen <= NUM_GENERATIONS:
         new_population = population[0:int(POP_SIZE/5)] # elitism on best 20% of gnomes
+        suitible_population = population[0:int(POP_SIZE/5)*2] # select best 40% for cross-over
+        # gnome_offspring(population[0].gnome, population[1].gnome)
+        random.shuffle(suitible_population)
 
-        gnome_offspring(population[0].gnome, population[1].gnome)
+        for i in range(len(suitible_population) - 1):
+            child1 = individual()
+            child1.gnome = gnome_offspring(suitible_population[i].gnome, suitible_population[i+1].gnome)
+            child1.fitness = cal_fitness(child1.gnome)
+            new_population.append(child1)
+            child2 = individual()
+            child2.gnome = gnome_offspring(suitible_population[i+1].gnome, suitible_population[i].gnome)
+            child2.fitness = cal_fitness(child2.gnome)
+            new_population.append(child2)
 
+
+        mutation_population = new_population.copy()
         for position, breeding_gnome in enumerate(population):
             nr_of_mutations = max(1, len(population) - position - POP_SIZE + int(POP_SIZE/5))
             for mut in range(nr_of_mutations):
@@ -266,6 +279,7 @@ def RunMaCHazineTSP():
                 new_gnome.gnome = mutated
                 new_gnome.fitness = cal_fitness(mutated)
                 new_population.append(new_gnome)
+    
         
         population = new_population
         population = list(set(population))

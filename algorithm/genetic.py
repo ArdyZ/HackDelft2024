@@ -6,6 +6,7 @@ import copy
 import functools
 import requests
 import operator
+import json
 
 INT_MAX = 100000000000
 # Number of cities in TSP
@@ -320,7 +321,7 @@ def RunMaCHazineTSP():
             printobj = {}
             printobj["distance"] = best_fitness
             printobj["route"] = population[0].gnome
-            print(printobj)
+            print(json.dumps(printobj))
             # print("\nGeneration", gen, "Best Fitness", best_fitness)
             # print("GNOME     FITNESS VALUE")
             # for pop in population:

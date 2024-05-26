@@ -25,6 +25,8 @@ NUM_GENERATIONS = 100000
 
 NUM_VEHICLES = NUM_BIKES + NUM_CARS
 
+NUM_RUNS = 1
+
 # Structure of a GNOME
 # defines the path traversed
 # by the salesman while the fitness value
@@ -316,16 +318,16 @@ def RunMaCHazineTSP():
         best_fitness = population[0].fitness
         best_fitness_over_time.append(best_fitness)
 
-        if gen % 100 == 0:
+        if gen % 50 == 0:
             printobj = {}
             printobj["distance"] = best_fitness
             printobj["route"] = population[0].gnome
             print(printobj)
 
-            if gen > 500:
-                if abs(best_fitness - best_fitness_over_time[gen-500]) < 1:
-                    print("convergence!")
-                    return
+            if gen > 1000:
+                if abs(best_fitness - best_fitness_over_time[gen-1000]) < 1:
+                    # print("convergence!")
+                    gen += NUM_GENERATIONS
             # print("\nGeneration", gen, "Best Fitness", best_fitness)
             # print("GNOME     FITNESS VALUE")
             # for pop in population:
@@ -336,7 +338,7 @@ def RunMaCHazineTSP():
     # print("GNOME     FITNESS VALUE")
     # for pop in population:
     #     print(pop.gnome, pop.fitness)
-
+    #
     # x = np.arange(len(best_fitness_over_time))  # X-axis points
     # y = best_fitness_over_time # Y-axis points
     #
@@ -345,6 +347,7 @@ def RunMaCHazineTSP():
     #
 
 if __name__ == "__main__":
-   RunMaCHazineTSP()
+    for _ in range(NUM_RUNS):
+        RunMaCHazineTSP()
 
 

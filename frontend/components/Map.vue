@@ -25,7 +25,7 @@
     >
       <LTooltip>{{ member.name }} | {{ member.address.name }}</LTooltip>
     </LMarker>
-    <LPolyline :lat-lngs="routeCoords" color="red" />
+    <LPolyline v-for="route in routeCoords" :lat-lngs="route" color="red" />
   </LMap>
 
   <UCard class="absolute top-24 right-4 w-80 z-[9999]">
@@ -74,15 +74,20 @@ import {
 } from "../server/lib/start";
 
 const { data: members } = await useFetch("/api/member");
-const { data: route } = await useFetch("/api/distance?a=26&b=22");
+const { data: route1 } = await useFetch("/api/distance?a=17&b=19");
+const { data: route2 } = await useFetch("/api/distance?a=19&b=24");
 
-const routeCoords = computed(() =>
-  route.value
-    ? route.value.geometry.map((coord) => ({
-        lat: coord.latitude,
-        lng: coord.longitude,
-      }))
-    : []
+const routeCoords = computed(() => {
+    const routes = [route1, route2]
+    return routes.map((route) =>
+      route.value
+        ? route.value.geometry.map((coord) => ({
+          lat: coord.latitude,
+          lng: coord.longitude,
+        }))
+        : []
+    )
+  }
 );
 
 const state = reactive({

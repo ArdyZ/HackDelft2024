@@ -321,7 +321,7 @@ def RunMaCHazineTSP():
             printobj = {}
             printobj["distance"] = best_fitness
             printobj["route"] = population[0].gnome
-            print(json.dumps(printobj))
+            print(json.dumps(printobj), flush=True)
             # print("\nGeneration", gen, "Best Fitness", best_fitness)
             # print("GNOME     FITNESS VALUE")
             # for pop in population:

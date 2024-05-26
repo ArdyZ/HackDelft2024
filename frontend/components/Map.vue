@@ -12,6 +12,9 @@
       layer-type="base"
       name="OpenStreetMap"
     />
+    <LMarker :lat-lng="[startLatitude, startLongitude]">
+      <LTooltip>EEMCS</LTooltip>
+    </LMarker>
     <LMarker
       v-for="member in members"
       :key="member.id"
@@ -25,7 +28,7 @@
     <LPolyline :lat-lngs="routeCoords" color="red" />
   </LMap>
 
-  <UCard class="absolute top-24 right-4 h-2/3 w-80 z-[9999]">
+  <UCard class="absolute top-24 right-4 w-80 z-[9999]">
     <template #header>
       <h3
         class="text-base font-semibold leading-6 text-gray-900 dark:text-white"
@@ -34,7 +37,29 @@
       </h3>
     </template>
 
-    <Placeholder class="h-full" />
+    <UFormGroup label="Cars Available" name="carsAvailable" class="mb-2">
+      <UInput
+        v-model="state.cars.available"
+        type="number"
+        icon="i-material-symbols-directions-car"
+      />
+    </UFormGroup>
+
+    <UFormGroup label="Bikes Available" name="bikesAvailable" class="mb-2">
+      <UInput
+        v-model="state.bikes.available"
+        type="number"
+        icon="i-material-symbols-directions-bike"
+      />
+    </UFormGroup>
+
+    <UFormGroup label="Capacity per Bike" name="bikesCapacity" class="mb-2">
+      <UInput
+        v-model="state.bikes.capacity"
+        type="number"
+        icon="i-material-symbols-backpack"
+      />
+    </UFormGroup>
 
     <template #footer>
       <UButton block icon="i-heroicons-rocket-launch">Run</UButton>
@@ -43,6 +68,11 @@
 </template>
 
 <script setup lang="ts">
+import {
+  longitude as startLongitude,
+  latitude as startLatitude,
+} from "../server/lib/start";
+
 const { data: members } = await useFetch("/api/member");
 const { data: route } = await useFetch("/api/distance?a=26&b=22");
 
@@ -54,4 +84,14 @@ const routeCoords = computed(() =>
       }))
     : []
 );
+
+const state = reactive({
+  cars: {
+    available: 1,
+  },
+  bikes: {
+    available: 4,
+    capacity: 20,
+  },
+});
 </script>

@@ -65,7 +65,7 @@
                     state.address.coordinates.latitude,
                     state.address.coordinates.longitude,
                   ]
-                : [51.998752, 4.373719]
+                : [startLatitude, startLongitude]
             "
             ref="map"
           >
@@ -101,6 +101,10 @@
 import type { FormSubmitEvent } from "#ui/types";
 
 import { create as memberCreate } from "../../server/lib/validation/member";
+import {
+  longitude as startLongitude,
+  latitude as startLatitude,
+} from "../../server/lib/start";
 
 const open = defineModel<boolean>("open");
 const emit = defineEmits<{ created: [] }>();

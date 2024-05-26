@@ -101,11 +101,17 @@ def mutate_gnome(gnome):
 
 # Change the order of two destinations within one vehicle
 def mutate_gnome_route(gnome):
-    vehicle = rand_num(0, NUM_VEHICLES)
+    all_vehs = np.arange(0, NUM_VEHICLES)
+    legal_vehs = [] 
+    for veh in all_vehs:
+        if len(gnome[veh]) >= 2:
+            legal_vehs.append(veh)
+    random.shuffle(legal_vehs)
+    if len(legal_vehs) == 0:
+        return mutate_gnome_vehicle(gnome) # If for some reason there's no legal vehicles for a swap, move an addresss between vehicles instead
+    vehicle = legal_vehs[0]
     gnome_v = gnome[vehicle][:]
-    if len(gnome_v) == 0 or len(gnome_v) == 1:
-        return mutate_gnome_route(gnome)
-        # return gnome
+
     while True:
         r = rand_num(0, len(gnome_v))
         r1 = rand_num(0, len(gnome_v))
@@ -119,17 +125,17 @@ def mutate_gnome_route(gnome):
 
 # Take a random address from one vehicle to a random other one
 def mutate_gnome_vehicle(gnome):
-    source_v = rand_num(0, NUM_VEHICLES)
-    dest_v = rand_num(0, NUM_VEHICLES)
-    if source_v == dest_v:
-        # return gnome
-        return mutate_gnome_vehicle(gnome)
-
-    # gnome_v_source = gnome[source_v]
-    # gnome_v_dest = gnome[dest_v]
-
-    if len(gnome[source_v]) == 0:
-        return mutate_gnome_vehicle(gnome)
+    all_vehs = np.arange(0, NUM_VEHICLES)
+    legal_source_vehs = []
+    for veh in all_vehs:
+        if len(gnome[veh]) != 0:
+            legal_source_vehs.append(veh)
+    random.shuffle(legal_source_vehs)
+    source_v = legal_source_vehs[0]
+    
+    np.delete(all_vehs, source_v)
+    np.random.shuffle(all_vehs)
+    dest_v = all_vehs[1]
 
     moved_location = gnome[source_v][rand_num(0, len(gnome[source_v]))]
     gnome[source_v].remove(moved_location)
@@ -139,8 +145,6 @@ def mutate_gnome_vehicle(gnome):
     else:
         insert_in = rand_num(0, len(gnome[dest_v]))
         gnome[dest_v].insert(insert_in, moved_location)
-        # gnome[dest_v] = gnome[dest_v][:random_split] + moved_letter + gnome[dest_v][random_split:]
-        # gnome[dest_v] = gnome[dest_v] + moved_letter
     
     return gnome
 

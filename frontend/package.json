@@ -10,7 +10,7 @@
     "postinstall": "nuxt prepare",
     "migrate": "kysely migrate latest",
     "seed": "kysely seed run",
-    "reset": "rm -rf database.db && yarn migrate && yarn seed"
+    "reset": "rm -rf database.db && rm -rf .nuxt/cache && yarn migrate && yarn seed"
   },
   "dependencies": {
     "@iconify-json/material-symbols": "^1.1.80",

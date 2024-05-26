@@ -323,7 +323,10 @@ def RunMaCHazineTSP():
         if gen % 50 == 0:
             printobj = {}
             printobj["distance"] = best_fitness
-            printobj["route"] = population[0].gnome
+            printobj["route"] = copy.deepcopy(population[0].gnome)
+            for i in printobj["route"]:
+                for j in range(len(i)):
+                    i[j] += 1
 
             print(json.dumps(printobj), flush=True)
 
@@ -367,6 +370,10 @@ if __name__ == "__main__":
     printobj = {}
     printobj["distance"] = best_pop.fitness
     printobj["route"] = best_pop.gnome
+    for i in printobj["route"]:
+        for j in range(len(i)):
+            i[j] += 1
+
     print(json.dumps(printobj), flush=True)
 
 

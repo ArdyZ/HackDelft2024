@@ -43,12 +43,13 @@ export const calculateDistance = defineCachedFunction(
     name: "calc_distance",
     getKey: (
       a: { longitude: number; latitude: number },
-      b: { longitude: number; latitude: number }
+      b: { longitude: number; latitude: number },
+      type: "driving" | "cycling"
     ) => {
       if (a.latitude + a.longitude >= b.latitude + b.longitude) {
-        return `${a.longitude},${a.latitude};${b.longitude},${b.latitude}`;
+        return `${a.longitude},${a.latitude};${b.longitude},${b.latitude}-${type}`;
       } else {
-        return `${b.longitude},${b.latitude};${a.longitude},${a.latitude}`;
+        return `${b.longitude},${b.latitude};${a.longitude},${a.latitude}-${type}`;
       }
     },
   }

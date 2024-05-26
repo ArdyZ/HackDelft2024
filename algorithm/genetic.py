@@ -266,11 +266,11 @@ def RunMaCHazineTSP():
         population.append(temp)
 
     population.sort()
-
-    print("\nInitial population: \nGNOME     FITNESS VALUE\n")
-    for i in range(POP_SIZE):
-        print(population[i].gnome, population[i].fitness)
-    print()
+    #
+    # print("\nInitial population: \nGNOME     FITNESS VALUE\n")
+    # for i in range(POP_SIZE):
+    #     print(population[i].gnome, population[i].fitness)
+    # print()
 
     while gen <= NUM_GENERATIONS:
         new_population = population[0:int(POP_SIZE/5)] # elitism on best 20% of gnomes
@@ -317,17 +317,21 @@ def RunMaCHazineTSP():
         best_fitness_over_time.append(best_fitness)
 
         if gen % 100 == 0:
-            print("\nGeneration", gen, "Best Fitness", best_fitness)
-            print("GNOME     FITNESS VALUE")
-            for pop in population:
-                print(pop.gnome, pop.fitness)
+            printobj = {}
+            printobj["distance"] = best_fitness
+            printobj["route"] = population[0].gnome
+            print(printobj)
+            # print("\nGeneration", gen, "Best Fitness", best_fitness)
+            # print("GNOME     FITNESS VALUE")
+            # for pop in population:
+            #     print(pop.gnome, pop.fitness)
         gen += 1
-
-    print("\nFinal Generation", "Best Fitness", best_fitness)
-    print("GNOME     FITNESS VALUE")
-    for pop in population:
-        print(pop.gnome, pop.fitness)
-
+    #
+    # print("\nFinal Generation", "Best Fitness", best_fitness)
+    # print("GNOME     FITNESS VALUE")
+    # for pop in population:
+    #     print(pop.gnome, pop.fitness)
+    #
     x = np.arange(len(best_fitness_over_time))  # X-axis points
     y = best_fitness_over_time # Y-axis points
 

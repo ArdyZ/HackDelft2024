@@ -25,7 +25,7 @@ NUM_GENERATIONS = 100000
 
 NUM_VEHICLES = NUM_BIKES + NUM_CARS
 
-NUM_RUNS = 1
+NUM_RUNS = 10
 
 # Structure of a GNOME
 # defines the path traversed
@@ -345,9 +345,19 @@ def RunMaCHazineTSP():
     # plt.plot(x, y)  # Plot the chart
     # plt.show()  # display
     #
+    return population[0]
 
 if __name__ == "__main__":
+    best_pop = individual()
+    best_pop.fitness = INT_MAX
     for _ in range(NUM_RUNS):
-        RunMaCHazineTSP()
+        cur_run = RunMaCHazineTSP()
+        if cur_run.fitness < best_pop.fitness:
+            best_pop = cur_run
+
+    printobj = {}
+    printobj["distance"] = best_pop.fitness
+    printobj["route"] = best_pop.gnome
+    print(json.dumps(printobj), flush=True)
 
 

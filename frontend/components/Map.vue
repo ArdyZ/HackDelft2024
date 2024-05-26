@@ -24,6 +24,22 @@
     </LMarker>
     <LPolyline :lat-lngs="routeCoords" color="red" />
   </LMap>
+
+  <UCard class="absolute top-24 right-4 h-2/3 w-80 z-[9999]">
+    <template #header>
+      <h3
+        class="text-base font-semibold leading-6 text-gray-900 dark:text-white"
+      >
+        Mission Control
+      </h3>
+    </template>
+
+    <Placeholder class="h-full" />
+
+    <template #footer>
+      <UButton block icon="i-heroicons-rocket-launch">Run</UButton>
+    </template>
+  </UCard>
 </template>
 
 <script setup lang="ts">

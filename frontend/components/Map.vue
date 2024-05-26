@@ -28,43 +28,53 @@
     <LPolyline v-for="route in routeCoords" :lat-lngs="route" color="red" />
   </LMap>
 
-  <UCard class="absolute top-24 right-4 w-80 z-[9999]">
-    <template #header>
-      <h3
-        class="text-base font-semibold leading-6 text-gray-900 dark:text-white"
-      >
-        Mission Control
-      </h3>
-    </template>
+  <UForm
+    ref="form"
+    :schema="startSchema"
+    :state="state"
+    class="space-y-4"
+    @submit="start"
+  >
+    <UCard class="absolute top-24 right-4 w-80 z-[9999]">
+      <template #header>
+        <h3
+          class="text-base font-semibold leading-6 text-gray-900 dark:text-white"
+        >
+          Mission Control
+        </h3>
+      </template>
 
-    <UFormGroup label="Cars Available" name="carsAvailable" class="mb-2">
-      <UInput
-        v-model="state.cars.available"
-        type="number"
-        icon="i-material-symbols-directions-car"
-      />
-    </UFormGroup>
+      <UFormGroup label="Cars Available" name="carsAvailable" class="mb-2">
+        <UInput
+          v-model="state.carsAvailable"
+          type="number"
+          icon="i-material-symbols-directions-car"
+        />
+      </UFormGroup>
 
-    <UFormGroup label="Bikes Available" name="bikesAvailable" class="mb-2">
-      <UInput
-        v-model="state.bikes.available"
-        type="number"
-        icon="i-material-symbols-directions-bike"
-      />
-    </UFormGroup>
+      <UFormGroup label="Bikes Available" name="bikesAvailable" class="mb-2">
+        <UInput
+          v-model="state.bikesAvailable"
+          type="number"
+          icon="i-material-symbols-directions-bike"
+        />
+      </UFormGroup>
 
-    <UFormGroup label="Capacity per Bike" name="bikesCapacity" class="mb-2">
-      <UInput
-        v-model="state.bikes.capacity"
-        type="number"
-        icon="i-material-symbols-backpack"
-      />
-    </UFormGroup>
+      <UFormGroup label="Capacity per Bike" name="bikesCapacity" class="mb-2">
+        <UInput
+          v-model="state.bikesCapacity"
+          type="number"
+          icon="i-material-symbols-backpack"
+        />
+      </UFormGroup>
 
-    <template #footer>
-      <UButton block icon="i-heroicons-rocket-launch">Run</UButton>
-    </template>
-  </UCard>
+      <template #footer>
+        <UButton type="submit" icon="i-heroicons-rocket-launch" block
+          >Run</UButton
+        >
+      </template>
+    </UCard>
+  </UForm>
 </template>
 
 <script setup lang="ts">
@@ -72,31 +82,42 @@ import {
   longitude as startLongitude,
   latitude as startLatitude,
 } from "../server/lib/start";
+import { start as startSchema } from "../server/lib/validation/start";
 
 const { data: members } = await useFetch("/api/member");
 const { data: route1 } = await useFetch("/api/distance?a=17&b=19&type=driving");
 const { data: route2 } = await useFetch("/api/distance?a=19&b=24&type=driving");
 
 const routeCoords = computed(() => {
-    const routes = [route1, route2]
-    return routes.map((route) =>
-      route.value
-        ? route.value.geometry.map((coord) => ({
+  const routes = [route1, route2];
+  return routes.map((route) =>
+    route.value
+      ? route.value.geometry.map((coord) => ({
           lat: coord.latitude,
           lng: coord.longitude,
         }))
-        : []
-    )
-  }
-);
-
-const state = reactive({
-  cars: {
-    available: 1,
-  },
-  bikes: {
-    available: 4,
-    capacity: 20,
-  },
+      : []
+  );
 });
+
+const state = reactive<startSchema>({
+  carsAvailable: 1,
+  bikesAvailable: 4,
+  bikesCapacity: 20,
+});
+
+const start = () => {
+  let query = "";
+  query += `carsAvailable=${encodeURIComponent(state.carsAvailable)}`;
+  query += `&bikesAvailable=${encodeURIComponent(state.bikesAvailable)}`;
+  query += `&bikesCapacity=${encodeURIComponent(state.bikesCapacity)}`;
+
+  const eventSource = new EventSource(
+    `http://localhost:3000/api/start?${query}`
+  );
+
+  eventSource.onmessage = (event) => {
+    console.log(event.data);
+  };
+};
 </script>

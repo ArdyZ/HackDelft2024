@@ -11,7 +11,7 @@ INT_MAX = 100000000000
 NUM_LOCATIONS = 30
 
 # Initial population size for the algorithm
-POP_SIZE = 20
+POP_SIZE = 30
 
 # Vehicles
 NUM_BIKES = 2
@@ -256,8 +256,11 @@ def RunMaCHazineTSP():
     while gen <= NUM_GENERATIONS:
         new_population = population[0:int(POP_SIZE/5)] # elitism on best 20% of gnomes
         suitible_population = population[0:int(POP_SIZE/5)*2] # select best 40% for cross-over
+        # suitible_population = population[:]
         # gnome_offspring(population[0].gnome, population[1].gnome)
         random.shuffle(suitible_population)
+        suitible_population.insert(0, population[0])
+        suitible_population.insert(1, population[1])
 
         for i in range(len(suitible_population) - 1):
             child1 = individual()

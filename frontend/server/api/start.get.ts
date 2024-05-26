@@ -1,3 +1,5 @@
+import { spawn } from "child_process";
+
 import { start } from "../lib/validation/start";
 
 export default defineEventHandler(async (event) => {
@@ -10,13 +12,27 @@ export default defineEventHandler(async (event) => {
   }
 
   const eventStream = createEventStream(event);
-  const interval = setInterval(async () => {
-    await eventStream.push(`Message @ ${new Date().toLocaleTimeString()}`);
-  }, 1000);
+
+  const algo = spawn("python3", ["../algorithm/genetic.py"]);
+
+  algo.stdout.on("data", (buf) => {
+    const data = JSON.parse(buf.toString());
+    eventStream.push(JSON.stringify(data));
+  });
+
+  algo.stderr.on("data", (data) => {
+    console.error(`Err: ${data}`);
+  });
+
+  algo.on("close", () => {
+    console.info("Algorithm done.");
+    eventStream.close();
+  });
 
   eventStream.onClosed(async () => {
-    clearInterval(interval);
     await eventStream.close();
+    algo.kill();
+    console.info("Evenstream closed.");
   });
 
   return eventStream.send();

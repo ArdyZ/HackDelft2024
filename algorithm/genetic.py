@@ -321,6 +321,11 @@ def RunMaCHazineTSP():
             printobj["distance"] = best_fitness
             printobj["route"] = population[0].gnome
             print(printobj)
+
+            if gen > 500:
+                if abs(best_fitness - best_fitness_over_time[gen-500]) < 1:
+                    print("convergence!")
+                    return
             # print("\nGeneration", gen, "Best Fitness", best_fitness)
             # print("GNOME     FITNESS VALUE")
             # for pop in population:
@@ -331,13 +336,13 @@ def RunMaCHazineTSP():
     # print("GNOME     FITNESS VALUE")
     # for pop in population:
     #     print(pop.gnome, pop.fitness)
+
+    # x = np.arange(len(best_fitness_over_time))  # X-axis points
+    # y = best_fitness_over_time # Y-axis points
     #
-    x = np.arange(len(best_fitness_over_time))  # X-axis points
-    y = best_fitness_over_time # Y-axis points
-
-    plt.plot(x, y)  # Plot the chart
-    plt.show()  # display
-
+    # plt.plot(x, y)  # Plot the chart
+    # plt.show()  # display
+    #
 
 if __name__ == "__main__":
    RunMaCHazineTSP()

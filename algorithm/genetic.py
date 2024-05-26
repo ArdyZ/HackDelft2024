@@ -14,7 +14,7 @@ INT_MAX = 10000000000000000
 NUM_LOCATIONS = 25
 
 # Initial population size for the algorithm
-POP_SIZE = 30
+POP_SIZE = 15
 
 # Vehicles
 NUM_BIKES = 2
@@ -27,7 +27,7 @@ NUM_GENERATIONS = 100000
 
 NUM_VEHICLES = NUM_BIKES + NUM_CARS
 
-NUM_RUNS = 10
+NUM_RUNS = 20
 
 # Structure of a GNOME
 # defines the path traversed
@@ -355,6 +355,7 @@ if __name__ == "__main__":
     NUM_CARS = int(sys.argv[1])
     NUM_BIKES = int(sys.argv[2])
     BIKE_CAPACITY = int(sys.argv[3])
+    NUM_VEHICLES = NUM_CARS + NUM_BIKES
     # print(sys.argv)
     best_pop = individual()
     best_pop.fitness = INT_MAX

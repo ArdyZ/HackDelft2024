@@ -1,7 +1,8 @@
 export const calculateDistance = defineCachedFunction(
   async (
     a: { longitude: number; latitude: number },
-    b: { longitude: number; latitude: number }
+    b: { longitude: number; latitude: number },
+    type: "driving" | "cycling"
   ) => {
     const config = useRuntimeConfig();
     const encodedToken = encodeURIComponent(config.mapboxKey);
@@ -19,7 +20,7 @@ export const calculateDistance = defineCachedFunction(
         };
       }[];
     }>(
-      `https://api.mapbox.com/directions/v5/mapbox/driving/${encodedPath}?access_token=${encodedToken}&geometries=geojson&overview=full&steps=false&notifications=none`
+      `https://api.mapbox.com/directions/v5/mapbox/${type}/${encodedPath}?access_token=${encodedToken}&geometries=geojson&overview=full&steps=false&notifications=none`
     );
 
     const r = res.routes[0];

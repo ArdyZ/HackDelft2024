@@ -74,8 +74,8 @@ import {
 } from "../server/lib/start";
 
 const { data: members } = await useFetch("/api/member");
-const { data: route1 } = await useFetch("/api/distance?a=17&b=19");
-const { data: route2 } = await useFetch("/api/distance?a=19&b=24");
+const { data: route1 } = await useFetch("/api/distance?a=17&b=19&type=driving");
+const { data: route2 } = await useFetch("/api/distance?a=19&b=24&type=driving");
 
 const routeCoords = computed(() => {
     const routes = [route1, route2]

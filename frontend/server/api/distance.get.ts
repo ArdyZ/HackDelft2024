@@ -18,7 +18,6 @@ export default defineEventHandler(async (event) => {
   if (!a || !b) {
     throw createError("One of the members is not found.");
   }
-
   return await calculateDistance(a.address.coordinates, b.address.coordinates, type);
 });
 

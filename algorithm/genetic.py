@@ -4,11 +4,12 @@ import math
 import matplotlib.pyplot as plt
 import copy
 import functools
+import requests
 import operator
 
-INT_MAX = 100000000000 
+INT_MAX = 100000000000
 # Number of cities in TSP
-NUM_LOCATIONS = 30
+NUM_LOCATIONS = 25
 
 # Initial population size for the algorithm
 POP_SIZE = 30
@@ -24,31 +25,16 @@ NUM_GENERATIONS = 100000
 
 NUM_VEHICLES = NUM_BIKES + NUM_CARS
 
-
 # Structure of a GNOME
 # defines the path traversed
 # by the salesman while the fitness value
 # of the path is stored in an integer
 
-# Temporary fake matrix generator
-def generate_points(max_range=100):
-    points = [(round(random.uniform(0, max_range),3), round(random.uniform(0, max_range), 3)) for _ in range(NUM_LOCATIONS)]
-    return points
-
 def create_distance_matrix():
-    points = generate_points()
-    matrix = [[0 for _ in range(len(points))] for _ in range(len(points))]
-    for i, p in enumerate(points):
-        for j, q in enumerate(points): 
-            matrix[i][j] = get_distance(p, q)
-    return matrix
+    return [[-1 for _ in range(NUM_LOCATIONS)] for _ in range(NUM_LOCATIONS)]
 
 def create_ewi_distances(max_range=100):
     return [round(random.uniform(0, max_range),3) for _ in range(NUM_LOCATIONS)]
-
-
-def get_distance(p, q):
-    return math.sqrt((p[0] - q[0]) ** 2 + (p[1] - q[1]) ** 2)
 
 BIKE_TIME_MATRIX = create_distance_matrix()
 CAR_TIME_MATRIX = create_distance_matrix()
@@ -66,7 +52,7 @@ class individual:
 
     def __gt__(self, other):
         return self.fitness > other.fitness
-    
+
     def __eq__(self, other):
         return self.gnome == other.gnome
 
@@ -104,7 +90,7 @@ def mutate_gnome(gnome):
 # Change the order of two destinations within one vehicle
 def mutate_gnome_route(gnome):
     all_vehs = np.arange(0, NUM_VEHICLES)
-    legal_vehs = [] 
+    legal_vehs = []
     for veh in all_vehs:
         if len(gnome[veh]) >= 2:
             legal_vehs.append(veh)
@@ -134,7 +120,7 @@ def mutate_gnome_vehicle(gnome):
             legal_source_vehs.append(veh)
     random.shuffle(legal_source_vehs)
     source_v = legal_source_vehs[0]
-    
+
     np.delete(all_vehs, source_v)
     np.random.shuffle(all_vehs)
     dest_v = all_vehs[1]
@@ -147,7 +133,7 @@ def mutate_gnome_vehicle(gnome):
     else:
         insert_in = rand_num(0, len(gnome[dest_v]))
         gnome[dest_v].insert(insert_in, moved_location)
-    
+
     return gnome
 
 
@@ -158,22 +144,41 @@ def create_gnome():
 
     for _ in range(NUM_VEHICLES):
         gnome.append([])
-    
+
     for i in range(NUM_LOCATIONS):
         chosen_vehicle = rand_num(0, NUM_VEHICLES)
         gnome[chosen_vehicle].append(i)
-    
+
     for i in range(len(gnome)):
         random.shuffle(gnome[i])
-        
+
     return gnome
 
-def ewi_distance(place):
-    return (BIKE_TIME_EWI[place], CAR_TIME_EWI[place]) 
+def ewi_distance(place, vehicle):
+    # Integrate real data
+    # return (BIKE_TIME_EWI[place], CAR_TIME_EWI[place])
+    return 1
 
 
-def get_addresses_cost(start, end):
-    return (BIKE_TIME_MATRIX[start][end], CAR_TIME_MATRIX[start][end]) 
+def get_addresses_cost(start, end, vehicle):
+    if vehicle == 0:
+        if BIKE_TIME_MATRIX[start][end] != -1:
+            return BIKE_TIME_MATRIX[start][end]
+    else:
+        if CAR_TIME_MATRIX[start][end] != -1:
+            return CAR_TIME_MATRIX[start][end]
+
+    requrl = "http://localhost:3000/api/distance?a={}&b={}&type={}".format(start + 1, end + 1, "cycling" if vehicle == 0 else "driving")
+    distance = requests.get(requrl).json()["distance"]
+
+    if vehicle == 0:
+        BIKE_TIME_MATRIX[start][end] = distance
+    else:
+        CAR_TIME_MATRIX[start][end] = distance
+
+    return distance
+
+    # return (BIKE_TIME_MATRIX[start][end], CAR_TIME_MATRIX[start][end])
 
 def gnome_offspring(partner1, partner2):
     structure_of_child = [len(x) for x in partner1]
@@ -188,7 +193,7 @@ def gnome_offspring(partner1, partner2):
     for i, current_address in enumerate(partner1):
         if i <= cutoff_point:
             unstructured_child.append(current_address)
-            
+
             # in partner2, swap index of current_address with i
             location_of_current_address_in_p2 = partner2.index(current_address)
             partner2[i], partner2[location_of_current_address_in_p2] = partner2[location_of_current_address_in_p2], partner2[i]
@@ -210,6 +215,7 @@ def gnome_offspring(partner1, partner2):
 def cal_fitness(gnome):
     f = 0
     for veh in range(NUM_VEHICLES):
+        # print(veh, 0 if veh < NUM_BIKES else 1)
         cur_fitness = fitness_one_vehicle(gnome[veh], 0 if veh < NUM_BIKES else 1)
         if cur_fitness == INT_MAX:
             return INT_MAX
@@ -221,13 +227,11 @@ def fitness_one_vehicle(partial_gnome, vehicle_type):
         return 0
     if vehicle_type == 0 and len(partial_gnome) > BIKE_CAPACITY:
         return INT_MAX
-    f = ewi_distance(partial_gnome[0])[vehicle_type] + ewi_distance(partial_gnome[-1])[vehicle_type]
+    f = ewi_distance(partial_gnome[0], vehicle_type) + ewi_distance(partial_gnome[-1], vehicle_type)
     # print(partial_gnome)
     for i in range(len(partial_gnome) - 1):
-        # if get_addresses_cost(partial_gnome[i], partial_gnome[i + 1])[vehicle_type] == INT_MAX:
-            # return INT_MAX
-        f += get_addresses_cost(partial_gnome[i], partial_gnome[i + 1])[vehicle_type]
-    
+        f += get_addresses_cost(partial_gnome[i], partial_gnome[i + 1], vehicle_type)
+
     if vehicle_type == 1:
         f *= CAR_PENALTY
     return f
@@ -282,8 +286,8 @@ def RunMaCHazineTSP():
                 new_gnome.gnome = mutated
                 new_gnome.fitness = cal_fitness(mutated)
                 new_population.append(new_gnome)
-    
-        
+
+
         population = new_population
         population = list(set(population))
         while len(population) < POP_SIZE:
@@ -293,10 +297,10 @@ def RunMaCHazineTSP():
             population.append(temp)
         population.sort()
         population = population[:POP_SIZE]
-        
+
         best_fitness = population[0].fitness
         best_fitness_over_time.append(best_fitness)
-        
+
         if gen % 100 == 0:
             print("\nGeneration", gen, "Best Fitness", best_fitness)
             print("GNOME     FITNESS VALUE")
@@ -308,10 +312,10 @@ def RunMaCHazineTSP():
     print("GNOME     FITNESS VALUE")
     for pop in population:
         print(pop.gnome, pop.fitness)
-    
+
     x = np.arange(len(best_fitness_over_time))  # X-axis points
     y = best_fitness_over_time # Y-axis points
- 
+
     plt.plot(x, y)  # Plot the chart
     plt.show()  # display
 

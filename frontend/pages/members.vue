@@ -54,6 +54,10 @@ const sort = ref({
 
 const columns = [
   {
+    label: "ID",
+    key: "id",
+  },
+  {
     label: "Name",
     key: "name",
     sortable: true,

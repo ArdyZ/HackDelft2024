@@ -9,8 +9,6 @@ export default defineEventHandler(async (event) => {
     throw result.error.issues;
   }
 
-  console.log(result.data);
-
   const db = useDB();
   await db
     .insertInto("member")

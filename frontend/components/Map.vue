@@ -26,6 +26,7 @@
       <LTooltip>{{ member.name }} | {{ member.address.name }}</LTooltip>
     </LMarker>
     <LPolyline v-for="route in routeCoords" :lat-lngs="route" color="red" />
+    <LPolyline v-for="route in routeCoords2" :lat-lngs="route" color="blue" />
   </LMap>
 
   <UForm
@@ -87,9 +88,22 @@ import { start as startSchema } from "../server/lib/validation/start";
 const { data: members } = await useFetch("/api/member");
 const { data: route1 } = await useFetch("/api/distance?a=17&b=19&type=driving");
 const { data: route2 } = await useFetch("/api/distance?a=19&b=24&type=driving");
+const { data: route3 } = await useFetch("/api/distance?a=19&b=24&type=cycling");
 
 const routeCoords = computed(() => {
   const routes = [route1, route2];
+  return routes.map((route) =>
+    route.value
+      ? route.value.geometry.map((coord) => ({
+          lat: coord.latitude,
+          lng: coord.longitude,
+        }))
+      : []
+  );
+});
+
+const routeCoords2 = computed(() => {
+  const routes = [route3];
   return routes.map((route) =>
     route.value
       ? route.value.geometry.map((coord) => ({

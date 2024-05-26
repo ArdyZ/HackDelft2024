@@ -2,7 +2,7 @@ import random
 import numpy as np
 import math
 import matplotlib.pyplot as plt
-
+import copy
 
 INT_MAX = 100000000000 
 # Number of cities in TSP
@@ -92,6 +92,7 @@ def repeat(s, ch):
 # with a random interchange
 # of two genes to create variation in species
 def mutate_gnome(gnome):
+    gnome = copy.deepcopy(gnome)
     mutation_type = rand_num(0, 2) # 0 is change route, 1 is change vehicle
     if mutation_type == 0:
         return mutate_gnome_route(gnome)

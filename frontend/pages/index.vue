@@ -1,1 +1,5 @@
-<template>Bla</template>
+<template></template>
+
+<script setup lang="ts">
+await navigateTo("/members");
+</script>

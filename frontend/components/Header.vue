@@ -1,16 +1,6 @@
 <script setup lang="ts">
 const links = [
   {
-    label: "Start",
-    icon: "i-heroicons-book-open",
-    to: "/",
-  },
-  {
-    label: "Releases",
-    icon: "i-heroicons-rocket-launch",
-    to: "/releases",
-  },
-  {
     label: "Members",
     icon: "i-heroicons-users-solid",
     to: "/members",

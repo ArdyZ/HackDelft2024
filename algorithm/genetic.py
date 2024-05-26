@@ -34,7 +34,7 @@ def create_distance_matrix():
     return [[-1 for _ in range(NUM_LOCATIONS)] for _ in range(NUM_LOCATIONS)]
 
 def create_ewi_distances(max_range=100):
-    return [round(random.uniform(0, max_range),3) for _ in range(NUM_LOCATIONS)]
+    return [-1 for _ in range(NUM_LOCATIONS)]
 
 BIKE_TIME_MATRIX = create_distance_matrix()
 CAR_TIME_MATRIX = create_distance_matrix()
@@ -157,7 +157,22 @@ def create_gnome():
 def ewi_distance(place, vehicle):
     # Integrate real data
     # return (BIKE_TIME_EWI[place], CAR_TIME_EWI[place])
-    return 1
+    if vehicle == 0:
+        if BIKE_TIME_EWI[place] != -1:
+            return BIKE_TIME_EWI[place]
+    else:
+        if CAR_TIME_EWI[place] != -1:
+            return CAR_TIME_EWI[place]
+
+    requrl = "http://localhost:3000/api/distanceEwi?b={}&type={}".format(place + 1, "cycling" if vehicle == 0 else "driving")
+    distance = requests.get(requrl).json()["distance"]
+
+    if vehicle == 0:
+        BIKE_TIME_EWI[place] = distance
+    else:
+        CAR_TIME_EWI[place] = distance
+
+    return distance
 
 
 def get_addresses_cost(start, end, vehicle):
